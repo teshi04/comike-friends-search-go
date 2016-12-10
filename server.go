@@ -6,14 +6,26 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/BurntSushi/toml"
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
+type Config struct {
+	ConsumerKey    string `toml:"consumerKey"`
+	ConsumerSecret string `toml:"consumerSecret"`
+}
+
 func GetAllFriends(screenName string) {
-	anaconda.SetConsumerKey("")
-	anaconda.SetConsumerSecret("")
+	var config Config
+	_, err := toml.DecodeFile("config.toml", &config)
+	if err != nil {
+		panic(err)
+	}
+
+	anaconda.SetConsumerKey(config.ConsumerKey)
+	anaconda.SetConsumerSecret(config.ConsumerSecret)
 
 	api := anaconda.NewTwitterApi("", "")
 
@@ -32,7 +44,6 @@ func GetAllFriends(screenName string) {
 		fmt.Print(c.Users[0].ScreenName)
 		nextCursor = c.Next_cursor_str
 	}
-
 }
 
 func search(c echo.Context) error {
